@@ -1,0 +1,16 @@
+extends ../layouts/main.pug
+
+block content
+  form(action='/store/add' method='POST' enctype='multipart/form-data')
+    section
+      input(placeholder='Item Name' name='name')
+    section
+      textarea(placeholder='Item Description' name='description')
+    section
+      input(id="image-input" name='images' type='file' multiple='multiple' accept='image/*')
+    section
+      ul#image-gallery.list
+    section
+      button(type='submit') Submit
+
+  script(type='text/javascript', src='/js/pages/store/add.js')

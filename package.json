@@ -5,14 +5,29 @@
   "main": "index.js",
   "scripts": {
     "start": "node server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape test/server/index.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "babelify": "^7.3.0",
+    "body-parser": "^1.17.0",
+    "browserify-middleware": "^7.1.0",
     "compression": "^1.6.2",
+    "dotenv": "^4.0.0",
     "express": "^4.15.0",
+    "install": "^0.8.7",
+    "massive": "^2.6.0",
+    "multer": "^1.3.0",
+    "postcss-cssnext": "^2.9.0",
+    "postcss-import": "^9.1.0",
+    "postcss-middleware": "^1.1.3",
     "pug": "^2.0.0-beta11",
-    "serve-static": "^1.12.0"
+    "serve-static": "^1.12.0",
+    "stripe": "^4.15.0",
+    "tachyons": "^4.6.2"
+  },
+  "devDependencies": {
+    "tape": "^4.6.3"
   }
 }
