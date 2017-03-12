@@ -20,7 +20,6 @@ const testRunner = (db, done) => {
         db.reset((err) => {
           t.equal(err, null)
           Model(ProductFixture).save((err, product) => {
-            console.log(product.attributes.images)
             t.equal(err, null)
             t.ok(product.attributes.id)
             t.equal(product.attributes.name, 'Spoon')

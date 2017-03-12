@@ -1,0 +1,11 @@
+h2= product.name
+
+section= product.price
+
+section= product.description
+
+section
+  ul
+    each image in product.images
+      li
+        img(src=`/store/photos/thumbs/${image.filename}`)

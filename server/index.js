@@ -1,6 +1,7 @@
 const Express = require('express')
 const http = require('http')
 const path = require('path')
+const session = require('express-session')
 const serveStatic = require('serve-static')
 const compression = require('compression')
 const postcss = require('postcss-middleware')
@@ -20,7 +21,7 @@ const server = http.Server(app)
 const port = process.env.PORT || 8080
 const connectionString = process.env.DATABASE_URL
 
-const massiveInstance = massive.connectSync({ connectionString })
+const massiveInstance = massive.connectSync({ connectionString, scripts: 'server/db' })
 
 stripe(process.env.STRIPE_TEST_KEY)
 
@@ -29,7 +30,16 @@ app.set('view engine', 'pug')
 app.use(compression())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(session({
+  store: new (require('connect-pg-simple')(session))(),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}))
+
 app.use(Routes(massiveInstance))
+
+app.use('/store/photos', serveStatic(__dirname + '/../uploads'))
 
 app.use('/css', postcss({
   src: (req) => {
@@ -45,14 +55,14 @@ app.get('/', (req, res, next) => {
   return res.render('index')
 })
 
-const servejs = (src) => {
-  return browserify(path.join(__dirname, '..', `public/js/pages/${src}`), {
-    transform: [
-      'babelify'
-    ],
-    cache: false
-  })
-}
+// const servejs = (src) => {
+//   return browserify(path.join(__dirname, '..', `public/js/pages/${src}`), {
+//     transform: [
+//       'babelify'
+//     ],
+//     cache: false
+//   })
+// }
 
 app.use('/js', browserify(path.join(__dirname, '..', 'public/js/'), {
   transform: [
