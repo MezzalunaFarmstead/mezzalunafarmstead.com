@@ -1,3 +1,6 @@
+const stripeTestKey = process.env.STRIPE_TEST_KEY
+//const stripePublishableKey = process
+const stripe = require('stripe')(stripeTestKey)
 const express = require('express')
 const multer = require('multer')
 const uuid = require('node-uuid')
@@ -24,12 +27,28 @@ const Routes = (db) => {
     res.render('store/add')
   })
 
-  router.get('/store/product/:productId', (req, res, next) => {
-    const productId = req.params.productId
+  router.get('/store/empty_cart', (req, res, next) => {
+    req.session.cart = []
+    return res.redirect('/store/cart')
+  })
 
-    Product.find(productId, (err, product) => {
+  router.get('/store/cart', (req, res, next) => {
+    console.log(req.session)
+    console.log('here')
+    const cart = req.session.cart || []
+    console.log(cart)
+    let products = []
+
+    if (!cart.length) return res.render('store/cart', { products })
+
+    Product.find(cart, (err, results) => {
       if (err) return next(err)
-      return res.render('store/product', { product: product.attributes })
+      if (!results) return res.render('store/cart', { products })
+
+      products = products.map((product) => {
+        return product.attributes
+      })
+      res.render('store/cart', { products })
     })
   })
 
@@ -60,9 +79,55 @@ const Routes = (db) => {
       model.save((err, product) => {
         if (err) return next(err)
         const id = product.attributes.id
-        return res.redirect(`/store/product/${id}`)
+        return res.redirect(`/store/${id}`)
       })
     }
+  })
+
+  router.get('/store/:productId', (req, res, next) => {
+    const productId = req.params.productId
+
+    Product.find(productId, (err, product) => {
+      if (err) return next(err)
+      return res.render('store/product', { product: product.attributes })
+    })
+  })
+
+  router.get('/store/:productId/charge', (req, res, next) => {
+    const productId = req.params.productId
+
+    Product.find(productId, (err, product) => {
+      if (err) return next(err)
+      return res.render('store/charge', { product: product.attributes })
+    })
+  })
+
+  router.post('/store/:productId/charge', (req, res, next) => {
+    const productId = req.params.productId
+
+    Product.find(productId, (err, product) => {
+      if (err) return next(err)
+      stripe.customers.create({
+
+      })
+    })
+  })
+
+  router.get('/store/:productId/add_to_cart', (req, res, next) => {
+    const productId = req.params.productId
+    if (!req.session.cart) req.session.cart = []
+
+    let alreadyExists = req.session.cart.find((id) => {
+      return id === productId
+    })
+
+    if (alreadyExists) return res.redirect('/store/cart')
+
+    Product.find(productId, (err, product) => {
+      if (err) return next(err)
+      req.session.cart.push(productId)
+      return res.redirect('/store/cart')
+    })
   })
 
   return router

@@ -135,26 +135,64 @@ const ProductModel = (db) => {
   }
 
   Product.find = (id, cb) => {
-    db.findProduct(id, (err, results) => {
-      if (!results.length) return cb(null, null)
+    console.log(id)
+    let isArray = false
+    let list = ''
 
-      const data = {
-        id: results[0].id,
-        name: results[0].name,
-        price: results[0].price,
-        description: results[0].description,
-        created_at: results[0].created_at,
-        updated_at: results[0].updated_at,
-        images: []
-      }
+    if (Array.isArray(id)) {
+      isArray = true
+      id.forEach((id, index) => {
+        if (index === 0) {
+          list = `${id}`
+          return
+        }
 
-      results.forEach((row) => {
-        if (!row.filename) return
-        data.images.push({ filename: row.filename })
+        list = `${list}, ${id}`
       })
 
+      id = list
+    }
+
+    db.findProduct([id], (err, results) => {
       if (err) return cb(err)
-      return cb(null, Product(data))
+      if (!results.length) return cb(null, null)
+      let productResults = []
+      const lookupObj = {}
+
+      results.forEach((row) => {
+        if (!lookupObj[row.id]) {
+          lookupObj[row.id] = {
+            id: row.id,
+            name: row.name,
+            price: row.price,
+            description: row.description,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            images: []
+          }
+        }
+
+        if (row.filename) {
+          lookupObj[row.id].images.push(row.filename)
+        }
+      })
+
+      for (var id in lookupObj) {
+        if (lookupObj.hasOwnProperty(id)) {
+          productResults.push(lookupObj[id])
+        }
+      }
+
+      if (isArray) {
+        productResults = productResults.map((data) => {
+          return Product(data)
+        })
+      } else {
+        productResults = Product(productResults[0])
+      }
+
+      if (err) return cb(err)
+      return cb(null, productResults)
     })
   }
 

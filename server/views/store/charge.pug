@@ -1,0 +1,28 @@
+h1 Ready to buy?
+
+section
+  ul.list
+    li Product Name: #{product.name}
+    li Price: #{product.price}
+
+section
+  h2 Use this info for testing:
+  ul.list
+    li Card number: 4242-4242-4242-4242
+    li CVC Code: any three digits
+    li Expiration: any date in the future
+
+section
+  h2 One time payment
+  form#payment-form(role="form" autocomplete="on" action=`/store/products/${product.id}/stripe` method="POST")
+    section#charge-error.alert.alert-danger.payment-errors
+    section
+      label Credit Card Number
+      input(type="tel" data-stripe="number" autocomplete="cc-number" placeholder="•••• •••• •••• ••••" required)
+    section
+      label CVC Number
+      input(type="tel" data-stripe="cvc" autocomplete="off" placeholder="CVC" required)
+    section
+      label Card expiration date
+      input(type="text" data-stripe="exp" placeholder="MM/YY" required)
+    button(type="submit") Submit

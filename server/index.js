@@ -7,7 +7,6 @@ const compression = require('compression')
 const postcss = require('postcss-middleware')
 const cssnext = require('postcss-cssnext')
 const cssImport = require('postcss-import')
-const stripe = require('stripe')
 const bodyParser = require('body-parser')
 const massive = require('massive')
 const browserify = require('browserify-middleware')
@@ -22,8 +21,6 @@ const port = process.env.PORT || 8080
 const connectionString = process.env.DATABASE_URL
 
 const massiveInstance = massive.connectSync({ connectionString, scripts: 'server/db' })
-
-stripe(process.env.STRIPE_TEST_KEY)
 
 app.set('views', './server/views')
 app.set('view engine', 'pug')

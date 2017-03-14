@@ -9,3 +9,10 @@ section
     each image in product.images
       li
         img(src=`/store/photos/thumbs/${image.filename}`)
+
+section
+  ul.list
+    li
+      a(href=`/store/${product.id}/charge`) Buy Now
+    li
+      a(href=`/store/${product.id}/add_to_cart`) Add to Cart

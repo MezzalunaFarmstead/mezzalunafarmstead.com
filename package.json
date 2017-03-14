@@ -4,7 +4,7 @@
   "description": "Website for mezzaluna farmstead.",
   "main": "index.js",
   "scripts": {
-    "start": "node server",
+    "start": "nodemon -w server ./server 8080",
     "test": "tape test/server/index.js"
   },
   "author": "",
