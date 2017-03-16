@@ -1,6 +1,13 @@
 h2 Your cart
 
-section
-  ul
-    each product in products
-      li= product.name
+if !products.length
+  section Your cart is empty
+else
+  section
+    ul
+      each product in products
+        li= `${product.name} - `
+          a(href=`/store/cart/${product.id}/remove`) remove from cart
+
+  section
+    h4 Your total: $#{totalPrice}

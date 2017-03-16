@@ -42,16 +42,17 @@ const ProductModel = (db) => {
     const attributes = Object.assign({}, defaultState, data)
 
     if (data.images && data.images.length) {
-      attributes.images = data.images.map((image) => {
-        const attrs = {
-          filename: image.filename
-        }
-
-        image.id ? attrs.id = image.id : null
-        image.product_id ? attrs.product_id = image.product_id : null
-
-        return attrs
-      })
+      attributes.images = Array.from(data.images)
+      // attributes.images = data.images.map((image) => {
+      //   const attrs = {
+      //     filename: image.filename
+      //   }
+      //
+      //   image.id ? attrs.id = image.id : null
+      //   image.product_id ? attrs.product_id = image.product_id : null
+      //
+      //   return attrs
+      // })
     }
 
     const save = (cb) => {
@@ -135,7 +136,6 @@ const ProductModel = (db) => {
   }
 
   Product.find = (id, cb) => {
-    console.log(id)
     let isArray = false
     let list = ''
 
@@ -197,9 +197,42 @@ const ProductModel = (db) => {
   }
 
   Product.findAll = (cb) => {
-    db.products.find((err, result) => {
+    db.findAllProducts((err, results) => {
       if (err) return cb(err)
-      return cb(null, result)
+      if (!results.length) return cb(null, null)
+      let productResults = []
+      const lookupObj = {}
+
+      results.forEach((row) => {
+        if (!lookupObj[row.id]) {
+          lookupObj[row.id] = {
+            id: row.id,
+            name: row.name,
+            price: row.price,
+            description: row.description,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            images: []
+          }
+        }
+
+        if (row.filename) {
+          lookupObj[row.id].images.push(row.filename)
+        }
+      })
+
+      for (var id in lookupObj) {
+        if (lookupObj.hasOwnProperty(id)) {
+          productResults.push(lookupObj[id])
+        }
+      }
+
+      productResults = productResults.map((data) => {
+        return Product(data)
+      })
+
+      if (err) return cb(err)
+      return cb(null, productResults)
     })
   }
 

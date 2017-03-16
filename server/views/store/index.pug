@@ -1,0 +1,14 @@
+extends ../layouts/main.pug
+
+block content
+  h1(style="font-family:Amiri;font-weight:400") Mezza Luna Farmstead
+  hr
+  h2 Craft Store
+
+  if !products.length
+    section We do not currently have any products in our store.
+  else
+    section
+      ul
+        each product in products
+          li= `${product.name}`

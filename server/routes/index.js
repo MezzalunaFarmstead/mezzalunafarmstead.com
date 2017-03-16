@@ -23,6 +23,18 @@ const Routes = (db) => {
     }
   })
 
+  router.get('/store', (req, res, next) => {
+    Product.findAll((err, products) => {
+      if (err) return next(err)
+
+      const productsJSON = products.map((product) => {
+        return product.attributes
+      })
+      console.log(productsJSON)
+      res.render('store/index', { products: productsJSON })
+    })
+  })
+
   router.get('/store/add', (req, res, next) => {
     res.render('store/add')
   })
@@ -32,23 +44,46 @@ const Routes = (db) => {
     return res.redirect('/store/cart')
   })
 
-  router.get('/store/cart', (req, res, next) => {
-    console.log(req.session)
-    console.log('here')
+  router.get('/store/cart/:productId/remove', (req, res, next) => {
     const cart = req.session.cart || []
-    console.log(cart)
+    const productIdToRemove = parseInt(req.params.productId, 10)
+    let itemIndex = null
+
+    cart.some((productId, index) => {
+      if (parseInt(productId, 10) !== productIdToRemove) return false
+      itemIndex = index
+      return true
+    })
+
+    if (itemIndex !== null) cart.splice(itemIndex, 1)
+
+    req.session.save((err) => {
+      if (err) return next(err)
+      res.redirect('/store/cart')
+    })
+  })
+
+  router.get('/store/cart', (req, res, next) => {
+    const cart = req.session.cart || []
     let products = []
 
     if (!cart.length) return res.render('store/cart', { products })
-
     Product.find(cart, (err, results) => {
       if (err) return next(err)
       if (!results) return res.render('store/cart', { products })
+      let totalPrice = 0
 
-      products = products.map((product) => {
+      products = results.map((product) => {
         return product.attributes
       })
-      res.render('store/cart', { products })
+
+      products.forEach((product) => {
+        totalPrice = product.price + totalPrice
+      })
+
+      totalPrice = (totalPrice / 100).toFixed(2)
+
+      res.render('store/cart', { products, totalPrice })
     })
   })
 
@@ -84,15 +119,6 @@ const Routes = (db) => {
     }
   })
 
-  router.get('/store/:productId', (req, res, next) => {
-    const productId = req.params.productId
-
-    Product.find(productId, (err, product) => {
-      if (err) return next(err)
-      return res.render('store/product', { product: product.attributes })
-    })
-  })
-
   router.get('/store/:productId/charge', (req, res, next) => {
     const productId = req.params.productId
 
@@ -126,7 +152,19 @@ const Routes = (db) => {
     Product.find(productId, (err, product) => {
       if (err) return next(err)
       req.session.cart.push(productId)
-      return res.redirect('/store/cart')
+      req.session.save((err) => {
+        if (err) return next(err)
+        return res.redirect('/store/cart')
+      })
+    })
+  })
+
+  router.get('/store/:productId', (req, res, next) => {
+    const productId = req.params.productId
+
+    Product.find(productId, (err, product) => {
+      if (err) return next(err)
+      return res.render('store/product', { product: product.attributes })
     })
   })
 
